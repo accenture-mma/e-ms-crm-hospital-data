@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<http:listener-config name="e-ms-crm-hospital-data-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="e-ms-crm-hospital-data-config" api="resource::92c38b33-c941-42cb-abb0-6e0da6122ce0:e-ms-crm-hospital-data:1.0.2:raml:zip:e-ms-crm-hospital-data.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="a19915f7-638d-42e2-b207-a37864308411" basePath="/api">
+		<http:request-connection host="s-ms-crm-hospital-data.us-e2.cloudhub.io"/>
+	</http:request-config>
+	<api-gateway:autodiscovery apiId="18847986" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="9e096871-fa6e-4032-a2a2-96bcf42d58a8" flowRef="e-ms-crm-hospital-data-main" />
+	<configuration-properties doc:name="Configuration properties" doc:id="54526ab6-d530-4104-9c9b-ff677c20f79c" file="properties/${mule.env}.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="79db0fae-dd28-4a07-862a-c74917262526" file="properties/${mule.env}.yaml" key="${mule.secureKey}" />	
+</mule>

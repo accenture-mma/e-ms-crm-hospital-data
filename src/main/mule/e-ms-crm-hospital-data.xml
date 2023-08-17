@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <flow name="e-ms-crm-hospital-data-main">
+        <http:listener config-ref="e-ms-crm-hospital-data-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="e-ms-crm-hospital-data-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="e-ms-crm-hospital-data-console">
+        <http:listener config-ref="e-ms-crm-hospital-data-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="e-ms-crm-hospital-data-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\getBedAvailableList:e-ms-crm-hospital-data-config">
+        <http:request method="GET" doc:name="Request" doc:id="73531241-f7b5-4b9b-8351-1b028bc6504e" config-ref="HTTP_Request_configuration" path="/getBedAvailableList">
+            <http:headers><![CDATA[#[output application/java
+---
+{
+	"client_secret": p('secure::systemAPI.clientSecret'),
+	"client_id": p('secure::systemAPI.clientId')
+}]]]></http:headers>
+            <http:query-params><![CDATA[#[output application/java
+---
+{
+	"hospital_name" : attributes.queryParams.hospital_name
+}]]]></http:query-params>
+        </http:request>
+        <logger level="INFO" doc:name="payload" doc:id="e2a983dd-570c-4001-926b-85bf1e905b5e" message="#[payload]" />
+    </flow>
+    <flow name="get:\getHospitalList:e-ms-crm-hospital-data-config">
+        <http:request method="GET" doc:name="Request" doc:id="c0d5f1f2-9eaf-4e3c-9fae-daf32c22afd0" config-ref="HTTP_Request_configuration" path="/getHospitalList">
+            <http:headers><![CDATA[#[output application/java
+---
+{
+	"client_secret": p('secure::systemAPI.clientSecret'),
+	"client_id": p('secure::systemAPI.clientId')
+}]]]></http:headers>
+        </http:request>
+        <logger level="INFO" doc:name="payload" doc:id="e456c9b6-bd09-47b2-b7dd-cd0e9020bf84" message="#[payload]" />
+    </flow>
+    <flow name="post:\createHospitalData:application\json:e-ms-crm-hospital-data-config">
+        <http:request method="POST" doc:name="Request" doc:id="a0f1b26f-b49f-486d-9452-137e5f197f3d" config-ref="HTTP_Request_configuration" path="/createHospitalData">
+            <http:headers><![CDATA[#[output application/java
+---
+{
+	"client_secret": p('secure::systemAPI.clientSecret'),
+	"client_id": p('secure::systemAPI.clientId')
+}]]]></http:headers>
+        </http:request>
+        <logger level="INFO" doc:name="payload" doc:id="de4fa6e9-fee0-45a9-8b9a-757a1806b980" message="#[payload]" />
+    </flow>
+    <flow name="post:\createPharmacyData:application\json:e-ms-crm-hospital-data-config">
+        <http:request method="POST" doc:name="Request" doc:id="7b338d09-ec71-4e36-94e1-d1c7da092b66" config-ref="HTTP_Request_configuration" path="/createPharmacyData">
+            <http:headers><![CDATA[#[output application/java
+---
+{
+	"client_secret": p('secure::systemAPI.clientSecret'),
+	"client_id": p('secure::systemAPI.clientId')
+}]]]></http:headers>
+        </http:request>
+        <logger level="INFO" doc:name="payload" doc:id="d9d14e65-0c2f-4705-aec6-fc9516376bcf" message="#[payload]" />
+    </flow>
+    <flow name="post:\updateBedData:application\json:e-ms-crm-hospital-data-config">
+        <http:request method="POST" doc:name="Request" doc:id="3769cc7b-912a-4840-bd92-5b238a594bd8" path="/updateBedData" config-ref="HTTP_Request_configuration">
+            <http:headers><![CDATA[#[output application/java
+---
+{
+	"client_secret": p('secure::systemAPI.clientSecret'),
+	"client_id": p('secure::systemAPI.clientId')
+}]]]></http:headers>
+        </http:request>
+        <logger level="INFO" doc:name="payload" doc:id="4a0b87a0-8d1e-482c-8c53-2131e7c7719c" message="#[payload]" />
+    </flow>
+    <flow name="post:\createDoctorData:application\json:e-ms-crm-hospital-data-config">
+        <http:request method="POST" doc:name="Request" doc:id="0459e4c7-55a8-4d24-8eb2-dabafbfea43f" config-ref="HTTP_Request_configuration" path="/createDoctorData">
+            <http:headers><![CDATA[#[output application/java
+---
+{
+	"client_secret": p('secure::systemAPI.clientSecret'),
+	"client_id": p('secure::systemAPI.clientId')
+}]]]></http:headers>
+        </http:request>
+        <logger level="INFO" doc:name="Logger" doc:id="726a7f3f-f51c-4e25-a31f-59039da45641" />
+    </flow>
+</mule>
